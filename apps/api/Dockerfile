@@ -10,19 +10,19 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Install Node dependencies first (for caching)
+# Install Node dependencies
 COPY package.json ./
 RUN npm install --omit=dev
 
 # Install Python dependencies
-COPY apps/api/requirements.txt ./apps/api/requirements.txt
-RUN pip install --no-cache-dir -r ./apps/api/requirements.txt
+COPY apps/api/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application
+# Copy everything
 COPY . .
 
-# Move API files to root for easier module resolution in Docker
-RUN cp -r apps/api/app/* ./app/ && rm -rf apps/api
+# Explicitly move the app directory to /app/app so it is a valid package
+RUN cp -r apps/api/app /app/app
 
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
