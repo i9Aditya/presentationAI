@@ -1,19 +1,33 @@
-﻿from fastapi import FastAPI
+﻿from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.routers import auth, generation, health
 
-
 app = FastAPI(
-    title="PresentationAI Local API",
-    version="0.3.0",
-    description="Local-first prompt-to-PPT/document generation backend with auth, subscriptions, Ollama, and PptxGenJS exports.",
+    title="PresentationAI API",
+    version="0.3.1",
 )
 
+@app.on_event("startup")
+async def startup_event():
+    print("🚀 PresentationAI API is starting up...")
+    print(f"Environment: {settings.app_env}")
+
+@app.middleware("http")
+async def fix_double_slashes(request: Request, call_next):
+    path = request.url.path
+    if "//" in path:
+        new_path = path.replace("//", "/")
+        # Internal redirect/rewrite or just continue? 
+        # For simplicity, let's just rewrite the scope path
+        request.scope["path"] = new_path
+    return await call_next(request)
+
 @app.get("/")
-def root():
-    return {"status": "online", "message": "PresentationAI API is running"}
+async def root():
+    return {"status": "online", "message": "PresentationAI API is live"}
 
 app.add_middleware(
     CORSMiddleware,
