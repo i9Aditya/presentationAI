@@ -180,10 +180,25 @@ class AuthService:
         return next((user for user in db.get("users", []) if user.get("id") == user_id), None)
 
     def _read(self) -> dict:
-        return json.loads(self.data_path.read_text(encoding="utf-8"))
+        try:
+            if not self.data_path.exists():
+                print(f"DEBUG: {self.data_path} not found, initializing empty DB")
+                return {"users": [], "sessions": {}}
+            content = self.data_path.read_text(encoding="utf-8")
+            if not content.strip():
+                return {"users": [], "sessions": {}}
+            return json.loads(content)
+        except Exception as e:
+            print(f"❌ Error reading users.json: {e}")
+            return {"users": [], "sessions": {}}
 
     def _write(self, payload: dict) -> None:
-        self.data_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        try:
+            self.data_path.parent.mkdir(parents=True, exist_ok=True)
+            self.data_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        except Exception as e:
+            print(f"❌ Error writing users.json: {e}")
+            raise HTTPException(status_code=500, detail="Storage Error: Could not save user data.")
 
 
 auth_service = AuthService()
