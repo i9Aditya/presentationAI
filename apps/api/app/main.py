@@ -23,3 +23,7 @@ app.mount("/files", StaticFiles(directory=settings.generated_files_dir), name="f
 app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(generation.router)
+
+@app.get("/")
+def root():
+    return {"message": "PresentationAI API is running", "docs": "/docs", "health": "/health/"}
