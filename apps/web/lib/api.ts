@@ -65,6 +65,7 @@ export function fileUrl(url?: string) {
   if (!url) return "#";
   if (url.startsWith("http")) return url;
   const base = apiBaseUrl();
+  // The url from the API already contains 'files/'
   const path = url.startsWith("/") ? url : `/${url}`;
   return `${base}${path}`;
 }

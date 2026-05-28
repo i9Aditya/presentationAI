@@ -4,13 +4,20 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.routers import auth, generation, health
 
+import os
+
 app = FastAPI(title="PresentationAI API")
+
+# Ensure generated directory exists at startup
+generated_path = os.path.abspath(settings.generated_files_dir)
+os.makedirs(generated_path, exist_ok=True)
 
 @app.get("/")
 async def health_root():
-    return {"status": "online", "service": "PresentationAI", "version": "0.3.2"}
+    return {"status": "online", "service": "PresentationAI", "version": "0.3.3"}
 
 # Mount and Include
+app.mount("/files", StaticFiles(directory=generated_path), name="files")
 app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(generation.router)
