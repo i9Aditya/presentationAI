@@ -9,6 +9,8 @@ class GenerateRequest(BaseModel):
     preferred_length: int | None = Field(default=None, ge=1, le=100)
     require_research: bool | None = None
     require_citations: bool | None = None
+    design_style: str | None = Field(default=None, max_length=80)
+    layout_pack: str | None = Field(default=None, max_length=80)
 
 
 class Intent(BaseModel):
@@ -53,3 +55,6 @@ class GenerateResponse(BaseModel):
     quality_checks: list[QualityCheck]
     exports: list[ExportOption]
 
+
+class ExportEditedRequest(BaseModel):
+    document: DocumentIR
