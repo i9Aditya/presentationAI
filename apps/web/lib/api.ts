@@ -53,7 +53,8 @@ export type GenerateResponse = {
 };
 
 export function apiBaseUrl() {
-  return process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+  const url = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
+  return url.endsWith("/") ? url.slice(0, -1) : url;
 }
 
 export function fileUrl(url?: string) {

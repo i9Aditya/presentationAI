@@ -11,9 +11,13 @@ app = FastAPI(
     description="Local-first prompt-to-PPT/document generation backend with auth, subscriptions, Ollama, and PptxGenJS exports.",
 )
 
+@app.get("/")
+def root():
+    return {"status": "online", "message": "PresentationAI API is running"}
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -23,7 +27,3 @@ app.mount("/files", StaticFiles(directory=settings.generated_files_dir), name="f
 app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(generation.router)
-
-@app.get("/")
-def root():
-    return {"message": "PresentationAI API is running", "docs": "/docs", "health": "/health/"}
