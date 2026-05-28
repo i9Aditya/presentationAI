@@ -412,7 +412,7 @@ export function PromptStudio() {
                   <div className="h-full rounded-full bg-sky-600" style={{ width: `${usagePercent}%` }} />
                 </div>
               </div>
-              <p>{result?.quality_checks.find((item) => item.name === "local_ai")?.message ?? "Local AI status appears after generation."}</p>
+              <p>{result?.quality_checks.find((item) => item.name === "local_ai" || item.name === "ai_status")?.message ?? "Local AI status appears after generation."}</p>
             </div>
           </section>
         </aside>

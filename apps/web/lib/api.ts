@@ -13,6 +13,44 @@ export type AuthResponse = {
   user: UserProfile;
 };
 
+export type ContentBlock =
+  | { type: "text"; role: "heading" | "subtitle" | "paragraph" | "callout"; text: string }
+  | { type: "bullets"; items: string[] }
+  | { type: "chart"; chart_kind: "bar" | "line" | "pie" | "doughnut" | "scatter"; title: string; data: { labels: string[]; values: number[] } }
+  | { type: "diagram"; diagram_kind: "mermaid" | "excalidraw" | "uml" | "architecture" | "flowchart"; title: string; source: string }
+  | { type: "table"; headers: string[]; rows: string[][] };
+
+export type DeckSection = {
+  id: string;
+  kind: string;
+  title: string;
+  layout?: string;
+  content_blocks: ContentBlock[];
+  speaker_notes?: string;
+  citation_ids?: string[];
+};
+
+export type DocumentIR = {
+  document_id: string;
+  type: string;
+  audience: string;
+  language: string;
+  style: string;
+  title: string;
+  sections: DeckSection[];
+  citations: unknown[];
+  theme: {
+    font_heading: string;
+    font_body: string;
+    primary: string;
+    accent: string;
+    background: string;
+    foreground: string;
+  };
+};
+
+export type ExportOption = { format: string; status: string; url?: string };
+
 export type GenerateResponse = {
   job_id: string;
   status: string;
@@ -28,19 +66,7 @@ export type GenerateResponse = {
     tone: string;
     language: string;
   };
-  document: {
-    document_id: string;
-    type: string;
-    title: string;
-    sections: Array<{
-      id: string;
-      kind: string;
-      title: string;
-      layout?: string;
-      content_blocks: Array<Record<string, unknown>>;
-      speaker_notes?: string;
-    }>;
-  };
+  document: DocumentIR;
   cost: {
     input_tokens: number;
     output_tokens: number;
@@ -49,7 +75,7 @@ export type GenerateResponse = {
     cache_strategy: string[];
   };
   quality_checks: Array<{ name: string; status: string; message: string }>;
-  exports: Array<{ format: string; status: string; url?: string }>;
+  exports: ExportOption[];
 };
 
 export function apiBaseUrl() {
@@ -97,6 +123,15 @@ export async function login(email: string, password: string): Promise<AuthRespon
   return readJson<AuthResponse>(response);
 }
 
+export async function googleLogin(profile: { email: string; name?: string; google_id?: string; picture?: string }): Promise<AuthResponse> {
+  const response = await fetch(`${apiBaseUrl()}/auth/google`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(profile)
+  });
+  return readJson<AuthResponse>(response);
+}
+
 export async function getMe(token: string): Promise<UserProfile> {
   const response = await fetch(`${apiBaseUrl()}/auth/me`, {
     headers: { Authorization: `Bearer ${token}` }
@@ -104,11 +139,24 @@ export async function getMe(token: string): Promise<UserProfile> {
   return readJson<UserProfile>(response);
 }
 
-export async function generateDocument(prompt: string, token: string): Promise<GenerateResponse> {
+export async function generateDocument(
+  prompt: string,
+  token: string,
+  options?: { preferred_length?: number; design_style?: string; layout_pack?: string }
+): Promise<GenerateResponse> {
   const response = await fetch(`${apiBaseUrl()}/generate`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-    body: JSON.stringify({ prompt })
+    body: JSON.stringify({ prompt, ...options })
   });
   return readJson<GenerateResponse>(response);
+}
+
+export async function exportEditedDocument(document: DocumentIR, token: string): Promise<ExportOption[]> {
+  const response = await fetch(`${apiBaseUrl()}/generate/export`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ document })
+  });
+  return readJson<ExportOption[]>(response);
 }
