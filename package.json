@@ -1,0 +1,17 @@
+{
+  "name": "ai-productivity-saas",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "packages/shared-schemas"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace apps/web run dev",
+    "build:web": "npm --workspace apps/web run build",
+    "lint:web": "npm --workspace apps/web run lint"
+  },
+  "dependencies": {
+    "pptxgenjs": "^4.0.1"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "users": [
+    {
+      "id": "usr_025ade2a1051",
+      "email": "mudgal.aaditya@gmail.com",
+      "name": "Aditya Mudgal",
+      "password_hash": "euzjbiw4SnclBMYQSvkobmXHZPiJ+Et6ZR5adqfqGYPheetNSLwrh/SYakz0xB86",
+      "plan": "free",
+      "role": "user",
+      "monthly_used": 2,
+      "billing_month": "2026-05",
+      "created_at": "2026-05-28T07:01:18.608801+00:00"
+    }
+  ],
+  "sessions": {
+    "0ylE9bMy7BmPjwXj_kDxb661Xkn8fP7aFeV1uuXhVmI": "usr_025ade2a1051"
+  }
+}
