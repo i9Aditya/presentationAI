@@ -21,10 +21,23 @@ class AuthService:
 
     def _get_conn(self):
         try:
-            return psycopg2.connect(self.db_url, cursor_factory=RealDictCursor)
+            # Ensure the URL starts with postgresql://
+            url = self.db_url
+            if url.startswith("postgres://"):
+                url = url.replace("postgres://", "postgresql://", 1)
+            
+            # Add SSL mode if not present
+            if "sslmode" not in url:
+                separator = "&" if "?" in url else "?"
+                url += f"{separator}sslmode=require"
+
+            return psycopg2.connect(url, cursor_factory=RealDictCursor)
         except Exception as e:
-            print(f"❌ Database Connection Error: {e}")
-            raise HTTPException(status_code=500, detail="Database connection failed.")
+            print(f"❌ DATABASE CONNECTION ERROR: {type(e).__name__}: {e}")
+            raise HTTPException(
+                status_code=500, 
+                detail=f"Database connection failed. Check logs for error: {type(e).__name__}"
+            )
 
     def signup(self, request: AuthRequest) -> AuthResponse:
         email = request.email.lower().strip()
