@@ -53,14 +53,16 @@ export type GenerateResponse = {
 };
 
 export function apiBaseUrl() {
-  const url = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
-  return url.endsWith("/") ? url.slice(0, -1) : url;
+  const url = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000").trim();
+  return url.replace(/\/+$/, ""); // Remove ALL trailing slashes
 }
 
 export function fileUrl(url?: string) {
   if (!url) return "#";
   if (url.startsWith("http")) return url;
-  return `${apiBaseUrl()}${url}`;
+  const base = apiBaseUrl();
+  const path = url.startsWith("/") ? url : `/${url}`;
+  return `${base}${path}`;
 }
 
 async function readJson<T>(response: Response): Promise<T> {

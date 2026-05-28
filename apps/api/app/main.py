@@ -5,29 +5,23 @@ from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.routers import auth, generation, health
 
-app = FastAPI(
-    title="PresentationAI API",
-    version="0.3.1",
-)
-
-@app.on_event("startup")
-async def startup_event():
-    print("🚀 PresentationAI API is starting up...")
-    print(f"Environment: {settings.app_env}")
+app = FastAPI(title="PresentationAI API")
 
 @app.middleware("http")
-async def fix_double_slashes(request: Request, call_next):
-    path = request.url.path
+async def clean_path_middleware(request: Request, call_next):
+    # Fix double slashes in path
+    path = request.scope.get("path", "")
     if "//" in path:
-        new_path = path.replace("//", "/")
-        # Internal redirect/rewrite or just continue? 
-        # For simplicity, let's just rewrite the scope path
-        request.scope["path"] = new_path
+        request.scope["path"] = path.replace("//", "/")
     return await call_next(request)
 
 @app.get("/")
-async def root():
-    return {"status": "online", "message": "PresentationAI API is live"}
+async def health_root():
+    return {"status": "online", "service": "PresentationAI"}
+
+@app.get("/healthz")
+async def health_check_simple():
+    return {"status": "ok"}
 
 app.add_middleware(
     CORSMiddleware,
