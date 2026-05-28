@@ -43,9 +43,17 @@ class OfficeExportService:
             input_path = Path(handle.name)
 
         try:
+            # Find the project root (where package.json and node_modules are)
+            # In Docker, it is at /app. Locally it might be 4 levels up.
+            project_root = Path(__file__).resolve().parent
+            while project_root != project_root.parent:
+                if (project_root / "package.json").exists():
+                    break
+                project_root = project_root.parent
+
             completed = subprocess.run(
                 ["node", str(renderer), str(input_path), str(path.resolve())],
-                cwd=str(Path(__file__).parents[4]),
+                cwd=str(project_root),
                 capture_output=True,
                 text=True,
                 timeout=90,

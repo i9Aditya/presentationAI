@@ -40,11 +40,17 @@ Use practical context where relevant.
                 response.raise_for_status()
                 data = response.json()
                 
+                if 'candidates' not in data or not data['candidates']:
+                    print(f"Gemini Error: No candidates in response: {data}")
+                    return []
+
                 # Gemini response parsing
                 text_content = data['candidates'][0]['content']['parts'][0]['text']
                 return self._parse_json_array(text_content, count)
         except Exception as e:
-            print(f"Gemini Error: {e}")
+            print(f"Gemini API Exception: {str(e)}")
+            if hasattr(e, 'response') and e.response:
+                print(f"Response Content: {e.response.text}")
             return []
 
     def status(self) -> dict[str, str]:
