@@ -18,14 +18,12 @@ RUN npm install --omit=dev
 COPY apps/api/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy only the necessary API code to the root 'app' package
-COPY apps/api/app ./app
-# Copy other internal dependencies if any (like packages)
-COPY packages ./packages
+# Copy all application code
+COPY . .
 
-# Create the generated directory
-RUN mkdir -p generated
+# Set PYTHONPATH to the root so 'apps.api.app' is a valid module
+ENV PYTHONPATH=/app
 
 EXPOSE 8000
-# Run uvicorn from the /app directory, looking for the 'app' package
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run uvicorn using the full path to the app
+CMD ["uvicorn", "apps.api.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
