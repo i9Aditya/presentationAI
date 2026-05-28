@@ -10,9 +10,21 @@
       "monthly_used": 2,
       "billing_month": "2026-05",
       "created_at": "2026-05-28T07:01:18.608801+00:00"
+    },
+    {
+      "id": "usr_6602efd299be",
+      "email": "yogitech23@gmail.com",
+      "name": "Aditya Mudgal",
+      "password_hash": "jCVjZCJBOqYFmu8pNKIhCddNVdnOlV8psKJtQjPoB4Pwe03L0CH/tBJfOjVsqX64",
+      "plan": "free",
+      "role": "user",
+      "monthly_used": 1,
+      "billing_month": "2026-05",
+      "created_at": "2026-05-28T10:14:09.508633+00:00"
     }
   ],
   "sessions": {
-    "0ylE9bMy7BmPjwXj_kDxb661Xkn8fP7aFeV1uuXhVmI": "usr_025ade2a1051"
+    "0ylE9bMy7BmPjwXj_kDxb661Xkn8fP7aFeV1uuXhVmI": "usr_025ade2a1051",
+    "ECDRbqCk77Z3z0GHlUNne4EQo22zbo10HUMbsXQasZo": "usr_6602efd299be"
   }
 }

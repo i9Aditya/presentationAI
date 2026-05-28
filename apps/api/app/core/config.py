@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "llama3.1"
     gemini_api_key: str | None = None
+    google_client_id: str | None = None
     llm_provider: str = "ollama"  # "ollama" or "gemini"
     generated_files_dir: str = "generated"
 

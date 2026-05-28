@@ -8,7 +8,7 @@ from pathlib import Path
 from uuid import uuid4
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from app.schemas.auth import AuthRequest, AuthResponse, LoginRequest, UserProfile
+from app.schemas.auth import AuthRequest, AuthResponse, GoogleAuthRequest, LoginRequest, UserProfile
 
 security = HTTPBearer(auto_error=False)
 
@@ -57,8 +57,39 @@ class AuthService:
     def login(self, request: LoginRequest) -> AuthResponse:
         db = self._read()
         user = self._find_user(db, request.email.lower().strip())
-        if not user or not self._verify_password(request.password, user["password_hash"]):
+        if not user or not user.get("password_hash") or not self._verify_password(request.password, user["password_hash"]):
             raise HTTPException(status_code=401, detail="Invalid email or password.")
+        token = self._create_session(db, user["id"])
+        self._write(db)
+        return AuthResponse(token=token, user=self._profile(self._rollover_user_month(user)))
+
+    def google_login(self, request: GoogleAuthRequest) -> AuthResponse:
+        email = request.email.lower().strip()
+        self._validate_email(email)
+        db = self._read()
+        user = self._find_user(db, email)
+        if not user:
+            user = {
+                "id": f"usr_{uuid4().hex[:12]}",
+                "email": email,
+                "name": request.name or email.split("@")[0],
+                "password_hash": None,
+                "google_id": request.google_id,
+                "picture": request.picture,
+                "plan": "free",
+                "role": "user",
+                "monthly_used": 0,
+                "billing_month": self._month_key(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            }
+            db["users"].append(user)
+        else:
+            if request.name and not user.get("name"):
+                user["name"] = request.name
+            if request.google_id:
+                user["google_id"] = request.google_id
+            if request.picture:
+                user["picture"] = request.picture
         token = self._create_session(db, user["id"])
         self._write(db)
         return AuthResponse(token=token, user=self._profile(self._rollover_user_month(user)))
