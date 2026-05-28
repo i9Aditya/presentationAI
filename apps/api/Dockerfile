@@ -21,6 +21,8 @@ RUN pip install --no-cache-dir -r ./apps/api/requirements.txt
 # Copy the rest of the application
 COPY . .
 
-ENV PYTHONPATH=/app/apps/api
+# Move API files to root for easier module resolution in Docker
+RUN cp -r apps/api/app/* ./app/ && rm -rf apps/api
+
 EXPOSE 8000
-CMD ["uvicorn", "apps.api.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
