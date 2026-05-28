@@ -1,8 +1,8 @@
 ﻿from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from apps.api.app.core.config import settings
-from apps.api.app.routers import auth, generation, health
+from app.core.config import settings
+from app.routers import auth, generation, health
 
 app = FastAPI(title="PresentationAI API")
 

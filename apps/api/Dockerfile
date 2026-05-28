@@ -10,20 +10,24 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Install Node dependencies
+# Copy requirement files
 COPY package.json ./
-RUN npm install --omit=dev
-
-# Install Python dependencies
 COPY apps/api/requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy all application code
-COPY . .
+# Install dependencies
+RUN npm install --omit=dev && pip install --no-cache-dir -r requirements.txt
 
-# Set PYTHONPATH to the root so 'apps.api.app' is a valid module
+# Copy internal packages first
+COPY packages ./packages
+
+# Copy the API code into the 'app' package
+COPY apps/api/app ./app
+
+# Create generated directory
+RUN mkdir -p generated
+
+# Ensure PYTHONPATH includes the root so 'app' is found
 ENV PYTHONPATH=/app
 
 EXPOSE 8000
-# Run uvicorn using the full path to the app
-CMD ["uvicorn", "apps.api.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
