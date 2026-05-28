@@ -21,15 +21,39 @@ class AuthService:
 
     def _get_conn(self):
         try:
-            # Ensure the URL starts with postgresql://
+            # We must handle passwords with '@' or other special chars.
+            # Instead of trying to parse the URL string manually, we'll let psycopg2 handle it, 
+            # BUT we need to ensure the user hasn't provided a malformed raw string.
+            # If the URL is provided as a standard string, psycopg2 handles it natively in modern versions.
             url = self.db_url
             if url.startswith("postgres://"):
                 url = url.replace("postgres://", "postgresql://", 1)
             
-            # Add SSL mode if not present
             if "sslmode" not in url:
                 separator = "&" if "?" in url else "?"
                 url += f"{separator}sslmode=require"
+
+            # If the user put '@' in their password without URL encoding it, 
+            # standard parsers will break (thinking the password ends at the first @).
+            # We will try to parse and fix it if it's broken.
+            import urllib.parse
+            parsed = urllib.parse.urlparse(url)
+            
+            # If the hostname looks like it swallowed part of the password (e.g. "2003AI@db.supabase.co")
+            if parsed.hostname and '@' in parsed.hostname:
+                print("DEBUG: Detected malformed connection string (unencoded '@' in password). Attempting fix.")
+                # We need to extract the raw string and encode the password part.
+                # Format is postgresql://user:password@host:port/dbname
+                # We can do a rudimentary split from the right to find the true host
+                try:
+                    scheme, rest = url.split("://", 1)
+                    credentials, host_port_db = rest.rsplit("@", 1)
+                    user, raw_password = credentials.split(":", 1)
+                    encoded_password = urllib.parse.quote_plus(raw_password)
+                    url = f"{scheme}://{user}:{encoded_password}@{host_port_db}"
+                    print(f"DEBUG: Fixed URL format.")
+                except Exception as e:
+                    print(f"DEBUG: URL fix attempt failed: {e}")
 
             return psycopg2.connect(url, cursor_factory=RealDictCursor)
         except Exception as e:
