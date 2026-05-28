@@ -27,7 +27,7 @@ os.makedirs(generated_path, exist_ok=True)
 # 4. Routes
 @app.get("/")
 async def health_root():
-    return {"status": "online", "service": "PresentationAI", "version": "0.3.4"}
+    return {"status": "online", "service": "PresentationAI", "version": "0.3.5"}
 
 app.mount("/files", StaticFiles(directory=generated_path), name="files")
 app.include_router(health.router)
