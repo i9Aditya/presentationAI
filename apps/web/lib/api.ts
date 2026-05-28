@@ -54,7 +54,11 @@ export type GenerateResponse = {
 
 export function apiBaseUrl() {
   const url = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000").trim();
-  return url.replace(/\/+$/, ""); // Remove ALL trailing slashes
+  const cleanUrl = url.replace(/\/+$/, "");
+  if (typeof window !== 'undefined') {
+    console.log("🔗 Connecting to API at:", cleanUrl);
+  }
+  return cleanUrl;
 }
 
 export function fileUrl(url?: string) {
